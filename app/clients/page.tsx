@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { supabase } from "@/lib/supabase"
 
 export default function Clients() {
@@ -13,6 +13,27 @@ export default function Clients() {
   notes: string
 }
 
+  const [clients, setClients] = useState<any[]>([])
+
+  async function fetchClients() {
+    const { data, error } = await supabase
+      .from("clients")
+      .select("*")
+
+    if (error) {
+      console.error(error)
+      return
+    }
+
+    setClients(data)
+  }
+
+  useEffect(() => {
+  fetchClients()
+  }, [])
+
+  
+
   const [form, setForm] = useState<ClientForm>({
     name: "",
     age: "",
@@ -23,8 +44,6 @@ export default function Clients() {
     })
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
-    console.log(e.target.name,"name")
-    console.log(e.target.name,"value")
     setForm({
       ...form,
       [e.target.name]: e.target.value
@@ -39,6 +58,8 @@ export default function Clients() {
       console.error(error)
       return
     }
+
+    await fetchClients()
 
     setForm({
     name: "",
@@ -112,7 +133,7 @@ export default function Clients() {
             </label>
             <input
               type="number"
-              name="startweight"
+              name="start_weight"
               value={form.start_weight}
               onChange={handleChange}
               placeholder="Current Weight"
@@ -162,7 +183,30 @@ export default function Clients() {
         </div>
 
       </div>
+      <div className="mt-10">
 
+    <h2 className="text-xl text-black font-semibold mb-4">Clients</h2>
+
+    <div className="space-y-3">
+
+    {clients.map((client) => (
+
+      <div
+        key={client.id}
+        className="p-4 border rounded-md flex justify-between"
+      >
+
+        <div>
+          <p className="font-medium text-black">{client.name}</p>
+          <p className="text-sm text-gray-500">{client.goal}</p>
+        </div>
+
+      </div>
+
+    ))}
+
+    </div>
+    </div>
     </div>
   )
 }
